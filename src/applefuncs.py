@@ -45,6 +45,7 @@ def get_apple_playlists(apple):
    return apple_lists
 
 def apple_dest_check(apple_lists, apple, dest_playlist_name):
+   print(f"dest_playlist_name check exist: {dest_playlist_name}")
    if dest_playlist_name in apple_lists:
       dest_playlist_id = apple_lists[dest_playlist_name]
       message("a+", "Playlist exists, adding missing songs")
@@ -60,8 +61,23 @@ def appleapi_create_playlist(playlist_name, headers):
    playlist_id = r.json()['data'][0]['id']
    return playlist_id
 
+def songs_sorting_byTime(playlist_content):
+   # print(f"playlist_content: {playlist_content}")
+
+   playlist_content.sort(key=lambda x: x['attributes']['releaseDate'], reverse=True)
+   # print(f"sorted playlist_content: {playlist_content}")
+   for i in range(10):
+      print(playlist_content[i]['attributes']['name'])
+      print(playlist_content[i]['attributes']['releaseDate'])
+      print()
+
+   return playlist_content
+
+
 def get_apple_playlist_content(apple, source_id):
    playlist_content = appleapi_get_playlist_content(source_id, apple)
+   # playlist_content = songs_sorting_byTime(playlist_content)
+   # print(f"playlist_content: {playlist_content}")
    result = []
    for song in playlist_content:
       artist = []
@@ -81,24 +97,34 @@ def appleapi_get_playlist_content(source_id, headers):
    if "errors" in r.json().keys():
       return []
    total = r.json()['meta']['total']
+   print(f"Total: {total}")
+   # print(f"r.json(): {r.json()}")
+   # print(f"r.json()['data']: {r.json()['data']}")
    return_data = r.json()['data']
    if total <= 100:
       return return_data
    total_requests = ceil(total/100)
+   # return_data = []
    for i in range(1, total_requests):
       uri = url+"&offset={}".format(i * 100)
       r = requests.get(uri, headers=headers)
-      return_data = set(return_data + r.json()['data'])
+      # return_data = set(return_data + r.json()['data'])
+      return_data = return_data + r.json()['data']
+      # return_data.append(r.json()['data'][0])
    return return_data
 
 def move_to_apple(apple, playlist_info, dest_id):
    not_found = []
    present_song = get_apple_playlist_content(apple, dest_id)
    playlist_info = what_to_move(present_song, playlist_info)
-   try:
-      for i in playlist_info:
+   print(f"len(playlist_info): {len(playlist_info)}")
+
+   # try:
+   for i in playlist_info:
+      try:
          i = i.replace("&@#72"," ")
          search = appleapi_music_search(i, apple)
+         # print(i, len(list(search['results'].keys())))
          if len(list(search['results'].keys())) == 0:
             bk = i
             i = re.sub("\(.*?\)","",i)
@@ -123,9 +149,16 @@ def move_to_apple(apple, playlist_info, dest_id):
                break
          else:
             not_found.append(i)
-      return not_found
-   except Exception:
-      return not_found
+      # print exception information and continue
+      except Exception as e:
+         print(f"Exception song: {i}")
+         print(e)
+         not_found.append(i)
+
+         continue
+   return not_found
+   # except Exception:
+   #    return not_found
 
 def appleapi_music_search(query, headers):
    url = "https://amp-api.music.apple.com:443/v1/catalog/ng/search?term={}&l=en-gb&platform=web&types=songs&limit=5&relate%5Beditorial-items%5D=contents&include[editorial-items]=contents&include[albums]=artists&include[songs]=artists&include[music-videos]=artists&extend=artistUrl&fields[artists]=url%2Cname%2Cartwork%2Chero&fields%5Balbums%5D=artistName%2CartistUrl%2Cartwork%2CcontentRating%2CeditorialArtwork%2Cname%2CplayParams%2CreleaseDate%2Curl&with=serverBubbles%2ClyricHighlights&art%5Burl%5D=c%2Cf&omit%5Bresource%5D=autos".format(query)

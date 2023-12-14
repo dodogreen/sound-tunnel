@@ -1,6 +1,6 @@
 # Client_ID and Client_secret from Spotify Developers Dashboard
-CLIENT_ID = ""
-CLIENT_SECRET = ""
+CLIENT_ID = "6a360d2dff414cca9e6a5e9fc9a7c611"
+CLIENT_SECRET = "e3e68924e0bd45f89cec35206fa18c27"
 
 # Option 1
 # REDIRECT_URI can be set to localhost
@@ -11,7 +11,7 @@ CLIENT_SECRET = ""
 # will probably see your access code in their logs, not a smart move)
 # 
 # MAKE SURE THE SAME REDIRECT URI SET HERE IS ALSO SET ON YOUR SPOTIPY DASHBOARD
-REDIRECT_URI = "http://localhost:9000/callback/"
+REDIRECT_URI = "http://localhost:4321/callback/"
 
 # The permissions needed to access all your spotify playlists
 SCOPE = "playlist-read-collaborative playlist-read-private user-library-read playlist-modify-private"

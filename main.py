@@ -16,7 +16,7 @@ def tunnel(source_playlist_name, source, destination, core_sessions):
    if " sound-tunnel" in source_playlist_name:
       dest_playlist_name = source_playlist_name
    else:
-      dest_playlist_name = source_playlist_name + " sound-tunnel"
+      dest_playlist_name = source_playlist_name
    if 'spotify' in source+destination:
       spotify = core_sessions['s'][0]
       spfy_lists = core_sessions['s'][1]
@@ -34,9 +34,13 @@ def tunnel(source_playlist_name, source, destination, core_sessions):
    if source == 'spotify':
       if source_playlist_name.lower() == "your likes":
          playlist_info = get_spfy_likes(spotify)
+         print(f"source_playlist_name: {source_playlist_name}")
+         print(f"playlist_info len: {len(playlist_info)}")
       else:
          source_playlist_id = confirm_playlist_exist(source_playlist_name, spfy_lists)
          playlist_info = get_spfy_playlist_content(spotify, source_playlist_id)
+         print(f"source_playlist_name: {source_playlist_name}")
+         print(f"playlist_info len: {len(playlist_info)}")
    elif source == 'youtube':
       source_playlist_id = confirm_playlist_exist(source_playlist_name, yt_lists)
       playlist_info = get_yt_playlist_content(ytmusic, source_playlist_id)
@@ -44,12 +48,21 @@ def tunnel(source_playlist_name, source, destination, core_sessions):
       source_playlist_id = confirm_playlist_exist(source_playlist_name, tidl_lists)
       playlist_info = get_tidal_playlist_content(tidal, source_playlist_id)
    elif source == 'apple':
+      # print(f"source_playlist_name: {source_playlist_name}")
+      # print(f"apple_lists: {apple_lists}")
+      # print(f"apple: {apple}")
+      # print(f"source_playlist_name: {source_playlist_name}")
+
       source_playlist_id = confirm_playlist_exist(source_playlist_name, apple_lists)
       playlist_info = get_apple_playlist_content(apple, source_playlist_id)
+      # print(f"playlist_info: {playlist_info}")
+      print(f"len(playlist_info): {len(playlist_info)}")
+
    else:
       print("[-]: {} is an unrecognized source. Use 'spotify', 'tidal' or 'youtube'".format(source))
       sys.exit(1)
 
+   trigger = False
    if destination == 'youtube':
       dest_playlist_id = yt_dest_check(ytmusic, yt_lists, dest_playlist_name)
       not_found = move_to_ytmusic(ytmusic, playlist_info, dest_playlist_id)
@@ -60,13 +73,20 @@ def tunnel(source_playlist_name, source, destination, core_sessions):
       dest_playlist_id = tidal_dest_check(tidl_lists, tidal, dest_playlist_name)
       not_found = move_to_tidal(tidal, playlist_info, dest_playlist_id)
    elif destination == 'apple':
+      if dest_playlist_name in apple_lists:
+         trigger = True
       dest_playlist_id = apple_dest_check(apple_lists, apple, dest_playlist_name)
       not_found = move_to_apple(apple, playlist_info, dest_playlist_id)
+      print(f"len(not_found): {len(not_found)}")
    else:
       print("[-]: {} is an unrecognized destination. Use 'spotify', 'tidal' or 'youtube'".format(destination))
       sys.exit(1)
 
-   write_to_file(source_playlist_name, not_found, source, destination)
+   if trigger == False:
+      print("writing to file")
+      write_to_file(source_playlist_name, not_found, source, destination)
+   else:
+      print("Playlist already exists skipping")
 
 
 def main():
@@ -85,6 +105,11 @@ def main():
       spotify = spotify_auth()
       spfy_id = spotify.me()['id']
       spfy_lists = get_spotify_playlists(spotify)
+      # for i in range(len(spfy_lists)):
+      #    print(i, spfy_lists[i])
+      # print(f"spfy_lists: {spfy_lists}")   
+      # exit()
+
       core_sessions['s'] = [spotify, spfy_lists, spfy_id]
    if 'tidal' in argz:
       tidal = tidal_auth()
@@ -97,7 +122,6 @@ def main():
    if args.L:
       if args.source == "spotify":
          message("s+","Displaying Playlists\n")
-         print("Your Likes")
          display_playlists(spfy_lists)
       elif args.source == "youtube":
          message("y+","Displaying Playlists\n")
@@ -111,6 +135,7 @@ def main():
       else:
          print("-s {} is unrecognized. Use '-s youtube', '-s spotify' etc".format(args.source))
          sys.exit(0)
+
    elif args.p:
       tunnel(args.p, args.source, args.destination, core_sessions)
    elif args.P:
@@ -127,7 +152,7 @@ def main():
          tunnel(playlist, args.source, args.destination, core_sessions)
    elif args.A:
       if args.source == 'spotify':
-         tunnel("your likes", args.source, args.destination, core_sessions)
+         # tunnel("your likes", args.source, args.destination, core_sessions)
          for playlist in spfy_lists:
             tunnel(playlist, args.source, args.destination, core_sessions)
       elif args.source == 'youtube':

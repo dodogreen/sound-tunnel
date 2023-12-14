@@ -29,7 +29,7 @@ def confirm_playlist_exist(source_playlist_name, plat_list):
    return source_playlist_id
 
 def what_to_move(old, new):
-   new = list(set(new) - set(old))
+   # new = list(set(new) - set(old))
    return new
 
 def compare(first, second):
