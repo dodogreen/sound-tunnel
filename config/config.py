@@ -1,6 +1,6 @@
 # Client_ID and Client_secret from Spotify Developers Dashboard
-CLIENT_ID = "6a360d2dff414cca9e6a5e9fc9a7c611"
-CLIENT_SECRET = "e3e68924e0bd45f89cec35206fa18c27"
+CLIENT_ID = ""
+CLIENT_SECRET = ""
 
 # Option 1
 # REDIRECT_URI can be set to localhost

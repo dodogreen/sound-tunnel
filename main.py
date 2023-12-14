@@ -152,7 +152,7 @@ def main():
          tunnel(playlist, args.source, args.destination, core_sessions)
    elif args.A:
       if args.source == 'spotify':
-         # tunnel("your likes", args.source, args.destination, core_sessions)
+         tunnel("your likes", args.source, args.destination, core_sessions)
          for playlist in spfy_lists:
             tunnel(playlist, args.source, args.destination, core_sessions)
       elif args.source == 'youtube':
